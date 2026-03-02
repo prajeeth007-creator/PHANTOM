@@ -1,297 +1,581 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>PHANTOM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMO - AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        body {
+            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-<style>
-:root{
-    --green:#3cff00;
-    --black:#0b0b0b;
-    --dark:#111;
-}
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
 
-body{
-    margin:0;
-    height:100vh;
-    background:var(--black);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:Arial, sans-serif;
-    color:white;
-}
+        /* BMO Robot */
+        .bmo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
 
-/* ===== MAIN CONTAINER ===== */
-.container{
-    width:420px;
-    height:650px;
-    background:var(--dark);
-    border-radius:16px;
-    display:flex;
-    flex-direction:column;
-    box-shadow:0 0 30px rgba(0,255,0,0.1);
-}
+        .bmo {
+            position: relative;
+            width: 200px;
+            height: 250px;
+        }
 
-/* ===== HEADER ===== */
-.header{
-    text-align:center;
-    padding:12px;
-    color:var(--green);
-    border-bottom:1px solid rgba(60,255,0,0.2);
-    font-weight:bold;
-    letter-spacing:2px;
-}
+        .bmo-body {
+            width: 200px;
+            height: 180px;
+            background: linear-gradient(135deg, #26a69a 0%, #2e8b81 100%);
+            border-radius: 20px;
+            border: 3px solid #1a5f5a;
+            position: relative;
+            animation: breathing 3s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
 
-/* ===== FACE ===== */
-.face-panel{
-    display:flex;
-    justify-content:center;
-    padding:20px;
-}
+        @keyframes breathing {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.02); }
+        }
 
-.face-screen{
-    width:220px;
-    height:180px;
-    background:#a7ff83;
-    border-radius:18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    transition:0.3s;
-}
+        .screen {
+            position: absolute;
+            width: 140px;
+            height: 120px;
+            background: #1a3a38;
+            border-radius: 10px;
+            top: 20px;
+            left: 30px;
+            border: 2px solid #00bcd4;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 188, 212, 0.3);
+        }
 
-.face-screen.speaking{
-    box-shadow:0 0 25px rgba(60,255,0,0.7);
-}
+        .eyes-container {
+            display: flex;
+            justify-content: space-around;
+            padding-top: 15px;
+            height: 50px;
+        }
 
-.eyes{
-    display:flex;
-    gap:30px;
-    margin-bottom:15px;
-}
+        .eye {
+            width: 30px;
+            height: 35px;
+            background: #00695c;
+            border-radius: 50%;
+            position: relative;
+            animation: blink 4s steps(1, end) infinite;
+        }
 
-.eye{
-    width:22px;
-    height:22px;
-    background:#111;
-    border-radius:50%;
-    transition:0.15s;
-}
+        @keyframes blink {
+            0%, 85%, 100% { height: 35px; }
+            90% { height: 3px; }
+        }
 
-.blink{
-    height:4px !important;
-}
+        .pupil {
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
-.mouth{
-    width:70px;
-    height:12px;
-    background:#111;
-    border-radius:10px;
-    transition:0.2s;
-}
+        .pupil::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #00bcd4;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            opacity: 0.8;
+        }
 
-.mouth.talking{
-    height:26px;
-    border-radius:14px;
-}
+        .mouth-container {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 10px;
+        }
 
-.mouth.happy{
-    height:18px;
-    border-radius:0 0 40px 40px;
-}
+        .mouth {
+            width: 60px;
+            height: 28px;
+            background: #26a69a;
+            border-radius: 0 0 60px 60px;
+            position: relative;
+            border: 2px solid #1a5f5a;
+            border-top: none;
+            animation: mouth-neutral 0.3s ease-out;
+        }
 
-.mouth.thinking{
-    width:40px;
-    height:6px;
-}
+        @keyframes mouth-neutral {
+            0% { transform: scaleY(0.8); }
+            100% { transform: scaleY(1); }
+        }
 
-.mouth.listening{
-    height:30px;
-    width:30px;
-    border-radius:50%;
-}
+        .mouth.happy {
+            animation: mouth-happy 0.3s ease-out;
+        }
 
-/* ===== CHAT ===== */
-.chat-box{
-    flex:1;
-    padding:15px;
-    overflow-y:auto;
-}
+        @keyframes mouth-happy {
+            0% { height: 15px; }
+            100% { height: 28px; }
+        }
 
-.botText span{
-    background:#1a1a1a;
-    padding:10px;
-    border-radius:10px;
-    display:inline-block;
-}
+        .mouth.thinking {
+            animation: mouth-thinking 0.3s ease-out;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            border: 2px solid #1a5f5a;
+        }
 
-.userText{
-    text-align:right;
-}
+        @keyframes mouth-thinking {
+            0% { width: 60px; }
+            100% { width: 25px; }
+        }
 
-.userText span{
-    background:#222;
-    padding:10px;
-    border-radius:10px;
-    display:inline-block;
-}
+        .mouth.confused {
+            animation: mouth-confused 0.3s ease-out;
+            border-radius: 60px 60px 0 0;
+            border-bottom: none;
+            border-top: 2px solid #1a5f5a;
+        }
 
-/* ===== INPUT ===== */
-.input-area{
-    padding:12px;
-    border-top:1px solid rgba(60,255,0,0.2);
-}
+        .mouth.speaking {
+            animation: mouth-speaking 0.15s ease-in-out infinite;
+        }
 
-#textInput{
-    width:100%;
-    padding:10px;
-    background:transparent;
-    border:1px solid rgba(60,255,0,0.4);
-    color:white;
-    border-radius:8px;
-}
+        @keyframes mouth-speaking {
+            0%, 100% { height: 25px; }
+            50% { height: 32px; }
+        }
 
-button{
-    width:100%;
-    margin-top:8px;
-    padding:10px;
-    background:transparent;
-    border:1px solid var(--green);
-    color:var(--green);
-    border-radius:8px;
-    cursor:pointer;
-}
+        .bmo-arm {
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background: #26a69a;
+            border-radius: 10px;
+            border: 2px solid #1a5f5a;
+            top: 80px;
+        }
 
-button:hover{
-    background:rgba(60,255,0,0.08);
-}
-</style>
+        .bmo-arm.left {
+            left: -25px;
+            animation: arm-wave 1s ease-in-out infinite;
+        }
+
+        .bmo-arm.right {
+            right: -25px;
+            animation: arm-wave 1s ease-in-out infinite 0.2s;
+        }
+
+        @keyframes arm-wave {
+            0%, 100% { transform: rotateZ(0deg); }
+            50% { transform: rotateZ(-15deg); }
+        }
+
+        .bmo-leg {
+            position: absolute;
+            width: 30px;
+            height: 25px;
+            background: #26a69a;
+            border-radius: 0 0 10px 10px;
+            border: 2px solid #1a5f5a;
+            border-top: none;
+            bottom: -20px;
+        }
+
+        .bmo-leg.left {
+            left: 40px;
+        }
+
+        .bmo-leg.right {
+            right: 40px;
+        }
+
+        .bmo-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: radial-gradient(ellipse at center, rgba(0, 188, 212, 0.2) 0%, transparent 70%);
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            border: 2px solid #00bcd4;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #26a69a 0%, #00bcd4 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 13px 13px 0 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            display: flex;
+            animation: message-appear 0.3s ease-out;
+        }
+
+        @keyframes message-appear {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            font-size: 14px;
+        }
+
+        .message.user .message-bubble {
+            background: #00bcd4;
+            color: white;
+            border-radius: 12px 0 12px 12px;
+        }
+
+        .message.ai .message-bubble {
+            background: #e0f2f1;
+            color: #1a3a38;
+            border-radius: 0 12px 12px 12px;
+            border-left: 3px solid #00bcd4;
+        }
+
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            background: #fafafa;
+            border-radius: 0 0 13px 13px;
+        }
+
+        .input-field {
+            flex: 1;
+            border: 1px solid #00bcd4;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #26a69a;
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+        }
+
+        .btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #26a69a 0%, #00bcd4 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.listening {
+            background: #ff6b6b;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00bcd4;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #26a69a;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .chat-container {
+                max-width: 100%;
+            }
+
+            .bmo {
+                width: 150px;
+                height: 200px;
+            }
+
+            .bmo-body {
+                width: 150px;
+                height: 130px;
+            }
+
+            .screen {
+                width: 110px;
+                height: 90px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="container">
-
-<div class="header">P.H.A.N.T.O.M</div>
-
-<div class="face-panel">
-    <div class="face-screen" id="face">
-        <div class="eyes">
-            <div class="eye" id="eyeL"></div>
-            <div class="eye" id="eyeR"></div>
+    <div class="container">
+        <!-- BMO Robot -->
+        <div class="bmo-wrapper">
+            <div class="bmo">
+                <div class="bmo-body">
+                    <div class="bmo-glow"></div>
+                    <div class="screen">
+                        <div class="eyes-container">
+                            <div class="eye left">
+                                <div class="pupil"></div>
+                            </div>
+                            <div class="eye right">
+                                <div class="pupil"></div>
+                            </div>
+                        </div>
+                        <div class="mouth-container">
+                            <div class="mouth" id="mouth"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bmo-arm left"></div>
+                <div class="bmo-arm right"></div>
+                <div class="bmo-leg left"></div>
+                <div class="bmo-leg right"></div>
+            </div>
         </div>
-        <div class="mouth neutral" id="mouth"></div>
+
+        <!-- Chat Interface -->
+        <div class="chat-container">
+            <div class="chat-header">BMO Assistant</div>
+            <div class="messages" id="messages"></div>
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    class="input-field" 
+                    id="inputField" 
+                    placeholder="Type something..."
+                    autocomplete="off"
+                >
+                <button class="btn" id="sendBtn" title="Send">➤</button>
+                <button class="btn" id="micBtn" title="Voice input">🎤</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="chat-box" id="chatbox">
-    <p class="botText"><span>Phantom online.</span></p>
-</div>
+    <script>
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const speechSynthesis = window.speechSynthesis;
+        const recognition = new SpeechRecognition();
 
-<div class="input-area">
-    <input id="textInput" type="text" placeholder="Speak or type...">
-    <button onclick="sendMessage()">Send</button>
-    <button id="micButton">🎤 Speak</button>
-</div>
+        const messagesContainer = document.getElementById('messages');
+        const inputField = document.getElementById('inputField');
+        const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
+        const mouth = document.getElementById('mouth');
 
-</div>
+        let isListening = false;
 
-<script>
-const mouth = document.getElementById("mouth");
-const eyeL = document.getElementById("eyeL");
-const eyeR = document.getElementById("eyeR");
-const face = document.getElementById("face");
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
 
-function setExpression(type){
-    mouth.className = "mouth " + type;
-}
+        recognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('listening');
+            setMouthEmotion('thinking');
+        };
 
-function setSpeaking(on){
-    if(on){
-        face.classList.add("speaking");
-        mouth.classList.add("talking");
-    }else{
-        face.classList.remove("speaking");
-        mouth.classList.remove("talking");
-        setExpression("neutral");
-    }
-}
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+            inputField.value = transcript;
+        };
 
-/* ===== BLINK ===== */
-setInterval(()=>{
-    eyeL.classList.add("blink");
-    eyeR.classList.add("blink");
-    setTimeout(()=>{
-        eyeL.classList.remove("blink");
-        eyeR.classList.remove("blink");
-    },150);
-},3000);
+        recognition.onend = () => {
+            isListening = false;
+            micBtn.classList.remove('listening');
+            setMouthEmotion('neutral');
+        };
 
-/* ===== SEND MESSAGE ===== */
-function sendMessage(){
-    let text = $("#textInput").val();
-    if(text === "") return;
+        function setMouthEmotion(emotion) {
+            mouth.className = emotion;
+        }
 
-    $("#chatbox").append('<p class="userText"><span>'+text+'</span></p>');
-    $("#textInput").val("");
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+            messageDiv.appendChild(bubble);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
 
-    $.get("/get",{ userMessage:text }).done(function(data){
-        $("#chatbox").append('<p class="botText"><span>'+data+'</span></p>');
-        $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+        function getAIResponse(userMessage) {
+            const responses = {
+                'hello': "Hello! I'm BMO, your friendly AI assistant! 😊",
+                'hi': "Hey there! What can I help you with?",
+                'how are you': "I'm doing great! Thanks for asking! My circuits are all buzzing happily.",
+                'joke': "Why did the AI go to school? To improve its neural network! 😄",
+                'help': "I can chat with you, answer questions, and respond to voice commands. Just type or click the mic button!",
+                'default': "That's interesting! Tell me more, or ask me anything!"
+            };
 
-        setExpression(emotionFromText(data));
-        speak(data);
-    });
-}
+            const lower = userMessage.toLowerCase();
+            for (let key in responses) {
+                if (lower.includes(key)) {
+                    return responses[key];
+                }
+            }
+            return responses['default'];
+        }
 
-$("#textInput").keypress(function(e){
-    if(e.which == 13) sendMessage();
-});
+        function speakResponse(text, emotion = 'happy') {
+            if (speechSynthesis.speaking) return;
 
-/* ===== EMOTION ===== */
-function emotionFromText(text){
-    text = text.toLowerCase();
-    if(text.includes("hello") || text.includes("hi")) return "happy";
-    if(text.includes("think") || text.includes("hmm")) return "thinking";
-    return "neutral";
-}
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            utterance.pitch = emotion === 'happy' ? 1.3 : emotion === 'thinking' ? 0.9 : 1;
+            utterance.volume = 1;
 
-/* ===== TEXT TO SPEECH ===== */
-function speak(text){
-    const speech = new SpeechSynthesisUtterance(text);
-    setSpeaking(true);
-    speech.onend = () => setSpeaking(false);
-    speechSynthesis.speak(speech);
-}
+            setMouthEmotion('speaking');
 
-/* ===== VOICE INPUT ===== */
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-recognition.lang = "en-US";
+            utterance.onend = () => {
+                setMouthEmotion('happy');
+            };
 
-$("#micButton").click(function(){
-    setExpression("listening");
-    recognition.start();
-});
+            speechSynthesis.speak(utterance);
+        }
 
-recognition.onresult = function(event){
-    let voiceText = event.results[0][0].transcript;
-    $("#textInput").val(voiceText);
-    sendMessage();
-};
+        function handleSendMessage() {
+            const message = inputField.value.trim();
+            if (!message) return;
 
-recognition.onend = function(){
-    setExpression("neutral");
-};
-</script>
+            addMessage(message, 'user');
+            inputField.value = '';
+            setMouthEmotion('thinking');
 
+            setTimeout(() => {
+                const response = getAIResponse(message);
+                addMessage(response, 'ai');
+                setMouthEmotion('happy');
+                speakResponse(response);
+            }, 500);
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+
+        micBtn.addEventListener('click', () => {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        // Welcome message
+        setTimeout(() => {
+            addMessage("Hi! I'm BMO! 👋 What would you like to talk about?", 'ai');
+            speakResponse("Hi! I'm BMO! What would you like to talk about?");
+        }, 500);
+    </script>
 </body>
 </html>
-
-
-
-
