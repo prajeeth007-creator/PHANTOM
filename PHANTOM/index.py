@@ -4,14 +4,13 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# ===== PHANTOM AI =====
+# Initialize BMO
 bot = ChatBot(
-    "PHANTOM",
-    read_only=False,
+    "BMO",
     logic_adapters=[
         {
             "import_path": "chatterbot.logic.BestMatch",
-            "default_response": "I'm not sure how to respond to that yet.",
+            "default_response": "BMO does not compute!",
             "maximum_similarity_threshold": 0.90
         }
     ]
@@ -20,16 +19,17 @@ bot = ChatBot(
 trainer = ChatterBotCorpusTrainer(bot)
 trainer.train("chatterbot.corpus.english")
 
-# ===== ROUTES =====
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/get")
 def get_response():
-    user_text = request.args.get("userMessage")
-    response = bot.get_response(user_text)
-    return str(response)
+    # This 'userMessage' must match the JS fetch URL
+    user_text = request.args.get("userMessage") 
+    if user_text:
+        return str(bot.get_response(user_text))
+    return "I didn't hear you!"
 
 if __name__ == "__main__":
     app.run(debug=True)
