@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>PHANTOM</title>
@@ -45,7 +45,7 @@ body{
     letter-spacing:2px;
 }
 
-/* ===== FACE PANEL ===== */
+/* ===== FACE ===== */
 .face-panel{
     display:flex;
     justify-content:center;
@@ -61,6 +61,11 @@ body{
     flex-direction:column;
     align-items:center;
     justify-content:center;
+    transition:0.3s;
+}
+
+.face-screen.speaking{
+    box-shadow:0 0 25px rgba(60,255,0,0.7);
 }
 
 .eyes{
@@ -74,6 +79,11 @@ body{
     height:22px;
     background:#111;
     border-radius:50%;
+    transition:0.15s;
+}
+
+.blink{
+    height:4px !important;
 }
 
 .mouth{
@@ -81,9 +91,31 @@ body{
     height:12px;
     background:#111;
     border-radius:10px;
+    transition:0.2s;
 }
 
-/* ===== CHAT AREA ===== */
+.mouth.talking{
+    height:26px;
+    border-radius:14px;
+}
+
+.mouth.happy{
+    height:18px;
+    border-radius:0 0 40px 40px;
+}
+
+.mouth.thinking{
+    width:40px;
+    height:6px;
+}
+
+.mouth.listening{
+    height:30px;
+    width:30px;
+    border-radius:50%;
+}
+
+/* ===== CHAT ===== */
 .chat-box{
     flex:1;
     padding:15px;
@@ -108,7 +140,7 @@ body{
     display:inline-block;
 }
 
-/* ===== INPUT AREA ===== */
+/* ===== INPUT ===== */
 .input-area{
     padding:12px;
     border-top:1px solid rgba(60,255,0,0.2);
@@ -146,25 +178,22 @@ button:hover{
 
 <div class="header">P.H.A.N.T.O.M</div>
 
-<!-- ===== FACE ===== -->
 <div class="face-panel">
-    <div class="face-screen">
+    <div class="face-screen" id="face">
         <div class="eyes">
-            <div class="eye"></div>
-            <div class="eye"></div>
+            <div class="eye" id="eyeL"></div>
+            <div class="eye" id="eyeR"></div>
         </div>
-        <div class="mouth" id="mouth"></div>
+        <div class="mouth neutral" id="mouth"></div>
     </div>
 </div>
 
-<!-- ===== CHAT ===== -->
 <div class="chat-box" id="chatbox">
     <p class="botText"><span>Phantom online.</span></p>
 </div>
 
-<!-- ===== INPUT ===== -->
 <div class="input-area">
-    <input id="textInput" type="text" placeholder="Say something...">
+    <input id="textInput" type="text" placeholder="Speak or type...">
     <button onclick="sendMessage()">Send</button>
     <button id="micButton">🎤 Speak</button>
 </div>
@@ -172,6 +201,36 @@ button:hover{
 </div>
 
 <script>
+const mouth = document.getElementById("mouth");
+const eyeL = document.getElementById("eyeL");
+const eyeR = document.getElementById("eyeR");
+const face = document.getElementById("face");
+
+function setExpression(type){
+    mouth.className = "mouth " + type;
+}
+
+function setSpeaking(on){
+    if(on){
+        face.classList.add("speaking");
+        mouth.classList.add("talking");
+    }else{
+        face.classList.remove("speaking");
+        mouth.classList.remove("talking");
+        setExpression("neutral");
+    }
+}
+
+/* ===== BLINK ===== */
+setInterval(()=>{
+    eyeL.classList.add("blink");
+    eyeR.classList.add("blink");
+    setTimeout(()=>{
+        eyeL.classList.remove("blink");
+        eyeR.classList.remove("blink");
+    },150);
+},3000);
+
 /* ===== SEND MESSAGE ===== */
 function sendMessage(){
     let text = $("#textInput").val();
@@ -183,18 +242,29 @@ function sendMessage(){
     $.get("/get",{ userMessage:text }).done(function(data){
         $("#chatbox").append('<p class="botText"><span>'+data+'</span></p>');
         $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+
+        setExpression(emotionFromText(data));
         speak(data);
     });
 }
 
-/* ===== ENTER KEY ===== */
 $("#textInput").keypress(function(e){
     if(e.which == 13) sendMessage();
 });
 
+/* ===== EMOTION ===== */
+function emotionFromText(text){
+    text = text.toLowerCase();
+    if(text.includes("hello") || text.includes("hi")) return "happy";
+    if(text.includes("think") || text.includes("hmm")) return "thinking";
+    return "neutral";
+}
+
 /* ===== TEXT TO SPEECH ===== */
 function speak(text){
     const speech = new SpeechSynthesisUtterance(text);
+    setSpeaking(true);
+    speech.onend = () => setSpeaking(false);
     speechSynthesis.speak(speech);
 }
 
@@ -204,7 +274,7 @@ const recognition = new SpeechRecognition();
 recognition.lang = "en-US";
 
 $("#micButton").click(function(){
-    $("#mouth").css("height","25px");
+    setExpression("listening");
     recognition.start();
 });
 
@@ -215,7 +285,7 @@ recognition.onresult = function(event){
 };
 
 recognition.onend = function(){
-    $("#mouth").css("height","12px");
+    setExpression("neutral");
 };
 </script>
 
