@@ -11,7 +11,7 @@ bot = ChatBot(
     logic_adapters=[
         {
             "import_path": "chatterbot.logic.BestMatch",
-            "default_response": "I'm thinking about that...",
+            "default_response": "I'm not sure how to respond to that yet.",
             "maximum_similarity_threshold": 0.90
         }
     ]
